@@ -17,13 +17,16 @@ REQUEST_TIMEOUT_SECONDS = 10
 
 
 def _next_7_day_dates():
-    today = datetime.now(timezone.utc).date()
+    utc_plus_6 = timezone(timedelta(hours=6))
+    today = datetime.now(utc_plus_6).date()
     end_date = today + timedelta(days=6)
     return today.isoformat(), end_date.isoformat()
 
 
 def _average_for_hour(times, values, hour):
     selected_values = []
+    # print(times)
+
     for ts, value in zip(times, values):
         if ts.endswith(hour) and value is not None:
             selected_values.append(value)
@@ -40,7 +43,7 @@ def _get_avg_temp_2pm_7d(latitude, longitude, start_date, end_date):
             "latitude": latitude,
             "longitude": longitude,
             "hourly": "temperature_2m",
-            "timezone": "UTC",
+            "timezone": "Asia/Dhaka",
             "start_date": start_date,
             "end_date": end_date,
         },
@@ -62,7 +65,7 @@ def _get_avg_pm25_7d(latitude, longitude):
             "latitude": latitude,
             "longitude": longitude,
             "hourly": "pm2_5",
-            "timezone": "UTC",
+            "timezone": "Asia/Dhaka",
             "past_days": 7,
         },
         timeout=REQUEST_TIMEOUT_SECONDS,
