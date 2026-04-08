@@ -24,7 +24,7 @@ def district_view(request):
 def top_10_districts_view(request):
     """Return top 10 Districts"""
     top_districts = DistrictScore.objects.select_related("district").order_by(
-        "district__source_id"
+        "avg_temp_2pm_7d", "avg_pm25_7d", "district__source_id"
     )[:10]
     print("top districts")
     print(top_districts)
