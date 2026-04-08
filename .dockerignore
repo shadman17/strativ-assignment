@@ -1,0 +1,38 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Git
+.git
+.gitignore
+
+# Virtual environments (never needed in container)
+venv/
+env/
+.venv/
+.env/
+
+# Local environment files
+*.env
+!.env.example
+
+# OS + Editor
+.DS_Store
+.idea/
+.vscode/
+
+# Django collected static + uploaded media
+media/
+static/
+staticfiles/
+
+# Tests + coverage
+tests/
+.coverage
+htmlcov/
+pytest_cache/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
