@@ -81,6 +81,60 @@ def _get_avg_pm25_7d(latitude, longitude):
     return sum(pm25_values) / len(pm25_values)
 
 
+def _get_hourly_temperature_by_date(latitude, longitude, start_date, end_date):
+    response = requests.get(
+        WEATHER_API_URL,
+        params={
+            "latitude": latitude,
+            "longitude": longitude,
+            "hourly": "temperature_2m",
+            "timezone": "Asia/Dhaka",
+            "start_date": start_date,
+            "end_date": end_date,
+        },
+        timeout=REQUEST_TIMEOUT_SECONDS,
+    )
+    # print(response.json())
+    response.raise_for_status()
+    payload = response.json().get("hourly", {})
+    # print(payload)
+    date_to_temp = {}
+    for ts, temp in zip(
+        payload.get("time", []),
+        payload.get("temperature_2m", []),
+    ):
+        if ts.endswith("14:00") and temp is not None:
+            date_to_temp[ts[:10]] = temp
+
+    return date_to_temp
+
+
+def _get_hourly_pm25_by_date(latitude, longitude, forecast_days):
+    response = requests.get(
+        AIR_QUALITY_API_URL,
+        params={
+            "latitude": latitude,
+            "longitude": longitude,
+            "hourly": "pm2_5",
+            "timezone": "Asia/Dhaka",
+            "forecast_days": forecast_days,
+        },
+        timeout=REQUEST_TIMEOUT_SECONDS,
+    )
+    response.raise_for_status()
+    payload = response.json().get("hourly", {})
+
+    date_to_pm25 = {}
+    for ts, pm25 in zip(
+        payload.get("time", []),
+        payload.get("pm2_5", []),
+    ):
+        if ts.endswith("14:00") and pm25 is not None:
+            date_to_pm25[ts[:10]] = pm25
+
+    return date_to_pm25
+
+
 @shared_task
 def populate_district_scores():
     start_date, end_date = _next_7_day_dates()
@@ -127,4 +181,56 @@ def populate_district_scores():
 
 @shared_task
 def populate_district_forecasts():
-    pass
+    start_date, end_date = _next_7_day_dates()
+    forecast_days = (
+        datetime.fromisoformat(end_date) - datetime.fromisoformat(start_date)
+    ).days + 1
+    updated_count = 0
+
+    for district in District.objects.all():
+        try:
+            temp_by_date = _get_hourly_temperature_by_date(
+                float(district.latitude),
+                float(district.longitude),
+                start_date,
+                end_date,
+            )
+            pm25_by_date = _get_hourly_pm25_by_date(
+                float(district.latitude),
+                float(district.longitude),
+                forecast_days,
+            )
+            # print(temp_by_date)
+            # print(pm25_by_date)
+
+            available_dates = sorted(
+                set(temp_by_date.keys()) & set(pm25_by_date.keys())
+            )
+
+            # print(available_dates)
+            if not available_dates:
+                logger.warning(
+                    "Skipping district %s due to missing forecast values",
+                    district.source_id,
+                )
+                continue
+
+            with transaction.atomic():
+                for forecast_date in available_dates:
+                    DistrictForecast.objects.update_or_create(
+                        district=district,
+                        forecast_date=forecast_date,
+                        defaults={
+                            "temp_2pm": temp_by_date[forecast_date],
+                            "pm25_2pm": pm25_by_date[forecast_date],
+                        },
+                    )
+                    updated_count += 1
+        except Exception as exc:
+            logger.exception(
+                "Failed to populate forecasts for district %s: %s",
+                district.source_id,
+                exc,
+            )
+
+    return f"Updated district forecasts for {updated_count} district-date rows"
