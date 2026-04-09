@@ -7,7 +7,7 @@ import requests
 from celery import shared_task
 from django.db import transaction
 
-from app_core.models import District, DistrictScore
+from app_core.models import District, DistrictScore, DistrictForecast
 
 logger = logging.getLogger(__name__)
 
@@ -123,3 +123,8 @@ def populate_district_scores():
             )
 
     return f"Updated district scores for {updated_count} districts"
+
+
+@shared_task
+def populate_district_forecasts():
+    pass

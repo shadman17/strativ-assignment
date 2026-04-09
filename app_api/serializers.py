@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from datetime import date, timedelta
 from app_core.models import District, DistrictScore
 
 
@@ -49,3 +49,31 @@ class DistrictScoreSerializer(serializers.ModelSerializer):
             "avg_pm25_7d",
             "calculated_at",
         )
+
+
+class TravelSerializer(serializers.Serializer):
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+    destination_district_id = serializers.PrimaryKeyRelatedField(
+        queryset=District.objects.all(),
+        source="destination_district",
+    )
+    travel_date = serializers.DateField()
+
+    def validate(self, attrs):
+        travel_date = attrs["travel_date"]
+        if travel_date is None:
+            raise serializers.ValidationError(
+                {"travel_date": "Travel date is required."}
+            )
+        return attrs
+
+    def validate_travel_date(self, value):
+        today = date.today()
+        if value < today:
+            raise serializers.ValidationError("Travel date cannot be in the past.")
+        if value > today + timedelta(days=30):
+            raise serializers.ValidationError(
+                "Travel date must be within the next 30 days."
+            )
+        return value
