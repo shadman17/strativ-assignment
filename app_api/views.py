@@ -37,3 +37,8 @@ def top_10_districts_view(request):
         },
         status=status.HTTP_200_OK,
     )
+
+
+@api_view(["GET"])
+def travel_recommendation_view(request):
+    pass

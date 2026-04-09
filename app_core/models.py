@@ -34,3 +34,25 @@ class DistrictScore(models.Model):
             f"{self.district.name}: temp={self.avg_temp_2pm_7d}, "
             f"pm25={self.avg_pm25_7d}"
         )
+
+
+class DistrictForecast(models.Model):
+    district = models.ForeignKey(
+        District,
+        on_delete=models.CASCADE,
+        related_name="forecasts",
+    )
+    forecast_date = models.DateField()
+    temp_2pm = models.FloatField()
+    pm25_2pm = models.FloatField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("district", "forecast_date")
+        ordering = ["forecast_date"]
+
+    def __str__(self):
+        return (
+            f"{self.district.name} - {self.forecast_date}: "
+            f"temp={self.temp_2pm}, pm25={self.pm25_2pm}"
+        )
