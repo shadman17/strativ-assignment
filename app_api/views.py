@@ -53,6 +53,7 @@ def top_10_districts_view(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def travel_recommendation_view(request):
+    """Return Recommendation with reason based on user's current and destination location"""
     serializer = TravelSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
