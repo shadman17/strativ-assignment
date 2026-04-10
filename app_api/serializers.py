@@ -64,8 +64,8 @@ class TravelSerializer(serializers.Serializer):
         today = date.today()
         if value < today:
             raise serializers.ValidationError("Travel date cannot be in the past.")
-        if value > today + timedelta(days=30):
+        if value > today + timedelta(days=6):
             raise serializers.ValidationError(
-                "Travel date must be within the next 30 days."
+                "Travel date must be within the next 6 days."
             )
         return value
