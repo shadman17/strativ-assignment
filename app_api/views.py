@@ -8,9 +8,14 @@ from .serializers import (
     TravelSerializer,
 )
 from .utils import get_nearest_district
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import authentication_classes, permission_classes
 
 
 @api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def district_view(request):
     """Return Districts"""
     districts = District.objects.all().order_by("source_id")
@@ -26,6 +31,8 @@ def district_view(request):
 
 
 @api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def top_10_districts_view(request):
     """Return top 10 Districts"""
     top_districts = (
@@ -47,6 +54,8 @@ def top_10_districts_view(request):
 
 
 @api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def travel_recommendation_view(request):
     serializer = TravelSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -61,6 +70,18 @@ def travel_recommendation_view(request):
         return Response(
             {"detail": "No district data available."},
             status=status.HTTP_404_NOT_FOUND,
+        )
+
+    if nearest_district == destination_district:
+        return Response(
+            {
+                "recommendation": "Recommended",
+                "reason": "Your current location and destination are in the same district.",
+                "selected_date": travel_date,
+                "current_location": {"nearest_district": nearest_district.name},
+                "destination": {"district": destination_district.name},
+            },
+            status=status.HTTP_200_OK,
         )
 
     current_forecast = DistrictForecast.objects.filter(

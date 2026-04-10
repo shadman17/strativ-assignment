@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third Party
     "rest_framework",
+    "rest_framework.authtoken",
     # Local app
     "app_core",
     "app_api",
@@ -109,6 +110,17 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# REST FRAMEWORK
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
@@ -160,10 +172,10 @@ CACHES = {
 CELERY_BEAT_SCHEDULE = {
     "populate-district-scores-daily": {
         "task": "app_core.tasks.populate_district_scores",
-        "schedule": crontab(hour=16, minute=7),
+        "schedule": crontab(hour=16, minute=23),
     },
     "populate-district-forecasts-daily": {
         "task": "app_core.tasks.populate_district_forecasts",
-        "schedule": crontab(hour=16, minute=7),
+        "schedule": crontab(hour=16, minute=23),
     },
 }
