@@ -52,3 +52,8 @@ pytest_cache/
 dist/
 build/
 *.egg-info/
+
+
+# Celery beat
+celerybeat-schedule
+celerybeat-schedule.*
