@@ -6,18 +6,15 @@ AIR_QUALITY_API_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 REQUEST_TIMEOUT_SECONDS = 10
 
 
-def _next_7_day_dates():
+def _next_n_day_dates(days):
     utc_plus_6 = timezone(timedelta(hours=6))
     today = datetime.now(utc_plus_6).date()
-    end_date = today + timedelta(days=6)
+    end_date = today + timedelta(days=days - 1)
     return today.isoformat(), end_date.isoformat()
 
 
-def _next_5_day_dates():
-    utc_plus_6 = timezone(timedelta(hours=6))
-    today = datetime.now(utc_plus_6).date()
-    end_date = today + timedelta(days=4)
-    return today.isoformat(), end_date.isoformat()
+def _district_coordinates(district):
+    return float(district.latitude), float(district.longitude)
 
 
 def _average_for_hour(times, values, hour):
@@ -91,10 +88,9 @@ def _get_hourly_temperature_by_date(latitude, longitude, start_date, end_date):
         },
         timeout=REQUEST_TIMEOUT_SECONDS,
     )
-    # print(response.json())
+
     response.raise_for_status()
     payload = response.json().get("hourly", {})
-    # print(payload)
     date_to_temp = {}
     for ts, temp in zip(
         payload.get("time", []),

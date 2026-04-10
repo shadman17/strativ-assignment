@@ -35,18 +35,14 @@ def district_view(request):
 @permission_classes([IsAuthenticated])
 def top_10_districts_view(request):
     """Return top 10 Districts"""
-    top_districts = (
-        DistrictScore.objects.select_related("district")
-        .filter(avg_temp_2pm_7d__isnull=False, avg_pm25_7d__isnull=False)
-        .order_by("avg_temp_2pm_7d", "avg_pm25_7d", "district__source_id")[:10]
-    )
-    print("top districts")
-    print(top_districts)
+    top_districts = DistrictScore.objects.select_related("district").order_by(
+        "avg_temp_2pm_7d", "avg_pm25_7d", "district__source_id"
+    )[:10]
     serializer = DistrictScoreSerializer(top_districts, many=True)
 
     return Response(
         {
-            "message": "Top 10 districts.",
+            "message": "Top 10 districts",
             "results": serializer.data,
         },
         status=status.HTTP_200_OK,
@@ -75,11 +71,9 @@ def travel_recommendation_view(request):
     if nearest_district == destination_district:
         return Response(
             {
-                "recommendation": "Recommended",
+                "message": "Travel Recommendation",
+                "recommendation": "Not Recommended",
                 "reason": "Your current location and destination are in the same district.",
-                "selected_date": travel_date,
-                "current_location": {"nearest_district": nearest_district.name},
-                "destination": {"district": destination_district.name},
             },
             status=status.HTTP_200_OK,
         )
@@ -108,7 +102,7 @@ def travel_recommendation_view(request):
     is_recommended = is_cooler and has_better_air
     reason = ""
 
-    if is_recommended:
+    if is_cooler and has_better_air:
         reason += f"Your destination is {abs(temp_diff)}°C cooler and significantly better air quality. Enjoy your trip!"
     elif not is_cooler and not has_better_air:
         reason += (
@@ -122,19 +116,9 @@ def travel_recommendation_view(request):
 
     return Response(
         {
+            "message": "Travel Recommendation",
             "recommendation": "Recommended" if is_recommended else "Not Recommended",
             "reason": reason,
-            "selected_date": travel_date,
-            "current_location": {
-                "nearest_district": nearest_district.name,
-                "temp_2pm": current_forecast.temp_2pm,
-                "pm25_2pm": current_forecast.pm25_2pm,
-            },
-            "destination": {
-                "district": destination_district.name,
-                "temp_2pm": destination_forecast.temp_2pm,
-                "pm25_2pm": destination_forecast.pm25_2pm,
-            },
         },
         status=status.HTTP_200_OK,
     )

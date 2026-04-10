@@ -158,7 +158,8 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
-
+CELERY_BEAT_HOUR = int(os.getenv("CELERY_BEAT_HOUR", "17"))
+CELERY_BEAT_MINUTE = int(os.getenv("CELERY_BEAT_MINUTE", "6"))
 
 REDIS_CACHE_URL = os.getenv("REDIS_CACHE_URL", "redis://localhost:6379/1")
 CACHES = {
@@ -172,10 +173,10 @@ CACHES = {
 CELERY_BEAT_SCHEDULE = {
     "populate-district-scores-daily": {
         "task": "app_core.tasks.populate_district_scores",
-        "schedule": crontab(hour=16, minute=23),
+        "schedule": crontab(hour=CELERY_BEAT_HOUR, minute=CELERY_BEAT_MINUTE),
     },
     "populate-district-forecasts-daily": {
         "task": "app_core.tasks.populate_district_forecasts",
-        "schedule": crontab(hour=16, minute=23),
+        "schedule": crontab(hour=CELERY_BEAT_HOUR, minute=CELERY_BEAT_MINUTE),
     },
 }

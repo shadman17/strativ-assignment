@@ -8,8 +8,8 @@ from django.db import transaction
 
 from app_core.models import District, DistrictScore, DistrictForecast
 from .utils import (
-    _next_7_day_dates,
-    _next_5_day_dates,
+    _next_n_day_dates,
+    _district_coordinates,
     _get_avg_temp_2pm_7d,
     _get_avg_pm25_7d,
     _get_hourly_temperature_by_date,
@@ -21,20 +21,21 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def populate_district_scores():
-    start_date, end_date = _next_7_day_dates()
+    start_date, end_date = _next_n_day_dates(7)
     updated_count = 0
-
-    for district in District.objects.all():
+    districts = District.objects.all()
+    for district in districts:
+        latitude, longitude = _district_coordinates(district)
         try:
             avg_temp = _get_avg_temp_2pm_7d(
-                float(district.latitude),
-                float(district.longitude),
+                latitude,
+                longitude,
                 start_date,
                 end_date,
             )
             avg_pm25 = _get_avg_pm25_7d(
-                float(district.latitude),
-                float(district.longitude),
+                latitude,
+                longitude,
                 start_date,
                 end_date,
             )
@@ -44,6 +45,7 @@ def populate_district_scores():
                     "Skipping district %s due to missing weather/air-quality values",
                     district.source_id,
                 )
+                continue
 
             with transaction.atomic():
                 DistrictScore.objects.update_or_create(
@@ -66,20 +68,21 @@ def populate_district_scores():
 
 @shared_task
 def populate_district_forecasts():
-    start_date, end_date = _next_5_day_dates()
+    start_date, end_date = _next_n_day_dates(5)
     updated_count = 0
-
-    for district in District.objects.all():
+    districts = District.objects.all()
+    for district in districts:
+        latitude, longitude = _district_coordinates(district)
         try:
             temp_by_date = _get_hourly_temperature_by_date(
-                float(district.latitude),
-                float(district.longitude),
+                latitude,
+                longitude,
                 start_date,
                 end_date,
             )
             pm25_by_date = _get_hourly_pm25_by_date(
-                float(district.latitude),
-                float(district.longitude),
+                latitude,
+                longitude,
                 start_date,
                 end_date,
             )
