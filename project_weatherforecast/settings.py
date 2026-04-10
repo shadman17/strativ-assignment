@@ -138,11 +138,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    # os.path.join(BASE_DIR, 'static')
-    BASE_DIR
-    / "static"
-]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -160,14 +155,6 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_HOUR = int(os.getenv("CELERY_BEAT_HOUR", "17"))
 CELERY_BEAT_MINUTE = int(os.getenv("CELERY_BEAT_MINUTE", "6"))
-
-REDIS_CACHE_URL = os.getenv("REDIS_CACHE_URL", "redis://localhost:6379/1")
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_CACHE_URL,
-    }
-}
 
 
 CELERY_BEAT_SCHEDULE = {
