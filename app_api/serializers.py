@@ -60,14 +60,6 @@ class TravelSerializer(serializers.Serializer):
     )
     travel_date = serializers.DateField()
 
-    def validate(self, attrs):
-        travel_date = attrs["travel_date"]
-        if travel_date is None:
-            raise serializers.ValidationError(
-                {"travel_date": "Travel date is required."}
-            )
-        return attrs
-
     def validate_travel_date(self, value):
         today = date.today()
         if value < today:

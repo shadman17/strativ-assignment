@@ -164,6 +164,6 @@ CELERY_BEAT_SCHEDULE = {
     },
     "populate-district-forecasts-daily": {
         "task": "app_core.tasks.populate_district_forecasts",
-        "schedule": crontab(hour=11, minute=51),
+        "schedule": crontab(hour=12, minute=14),
     },
 }
