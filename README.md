@@ -93,10 +93,19 @@ Follow the prompts to create username/password.
 
 Use your new username/password to get auth token:
 
+**Terminal (Mac/Linux)**
 ```bash
 curl -X POST http://localhost:8005/api/v1/auth/token/ \
   -H "Content-Type: application/json" \
   -d '{"username":"YOUR_USERNAME","password":"YOUR_PASSWORD"}'
+```
+
+**Powershell (Windows)**
+```bash
+Invoke-RestMethod -Uri "http://localhost:8005/api/v1/auth/token/" `
+  -Method POST `
+  -Headers @{ "Content-Type" = "application/json" } `
+  -Body '{"username":"YOUR_USERNAME","password":"YOUR_PASSWORD"}'
 ```
 
 You will get a token like:
@@ -115,13 +124,23 @@ Replace `YOUR_TOKEN` with your real token.
 
 ### A) Top 10 districts
 
+**Terminal (Mac/Linux)**
 ```bash
 curl -X GET http://localhost:8005/api/v1/districts/top-10-districts/ \
   -H "Authorization: Token YOUR_TOKEN"
 ```
 
+**Powershell (Windows)**
+```bash
+Invoke-RestMethod -Uri "http://localhost:8005/api/v1/districts/top-10-districts/" `
+  -Method GET `
+  -Headers @{ "Authorization" = "Token YOUR_TOKEN" }
+```
+> Do not miss Token keyword! Also, make sure you ran Celery Periodic Task at least once! Celery Periodic Task setup is mentioned below!
+
 ### B) Travel recommendation
 
+**Terminal (Mac/Linux)**
 ```bash
 curl -X POST http://localhost:8005/api/v1/travel/recommendation/ \
   -H "Content-Type: application/json" \
@@ -129,10 +148,27 @@ curl -X POST http://localhost:8005/api/v1/travel/recommendation/ \
   -d '{
     "latitude": 23.8103,
     "longitude": 90.4125,
-    "destination_district": 1,
+    "destination_district_id": 1,
     "travel_date": "2026-04-15"
   }'
 ```
+
+**Powershell (Windows)**
+```bash
+Invoke-RestMethod -Uri "http://localhost:8005/api/v1/travel/recommendation/" `
+  -Method POST `
+  -Headers @{ 
+    "Content-Type"  = "application/json"
+    "Authorization" = "Token YOUR_TOKEN"
+  } `
+  -Body '{
+    "latitude": 23.8103,
+    "longitude": 90.4125,
+    "destination_district_id": 1,
+    "travel_date": "2026-04-15"
+  }'
+```
+> Do not miss Token keyword! Also, make sure you ran Celery Periodic Task at least once! Celery Periodic Task setup is mentioned below!
 
 ---
 
