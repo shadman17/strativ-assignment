@@ -22,8 +22,8 @@ class DistrictScore(models.Model):
         on_delete=models.CASCADE,
         related_name="travel_score",
     )
-    avg_temp_2pm_7d = models.FloatField()
-    avg_pm25_7d = models.FloatField()
+    avg_temp_2pm_7d = models.FloatField(null=True, blank=True)
+    avg_pm25_7d = models.FloatField(null=True, blank=True)
     calculated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

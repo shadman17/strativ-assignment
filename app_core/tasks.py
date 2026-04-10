@@ -9,6 +9,7 @@ from django.db import transaction
 from app_core.models import District, DistrictScore, DistrictForecast
 from .utils import (
     _next_7_day_dates,
+    _next_5_day_dates,
     _get_avg_temp_2pm_7d,
     _get_avg_pm25_7d,
     _get_hourly_temperature_by_date,
@@ -34,6 +35,8 @@ def populate_district_scores():
             avg_pm25 = _get_avg_pm25_7d(
                 float(district.latitude),
                 float(district.longitude),
+                start_date,
+                end_date,
             )
 
             if avg_temp is None or avg_pm25 is None:
@@ -41,7 +44,6 @@ def populate_district_scores():
                     "Skipping district %s due to missing weather/air-quality values",
                     district.source_id,
                 )
-                continue
 
             with transaction.atomic():
                 DistrictScore.objects.update_or_create(
@@ -64,10 +66,7 @@ def populate_district_scores():
 
 @shared_task
 def populate_district_forecasts():
-    start_date, end_date = _next_7_day_dates()
-    forecast_days = (
-        datetime.fromisoformat(end_date) - datetime.fromisoformat(start_date)
-    ).days + 1
+    start_date, end_date = _next_5_day_dates()
     updated_count = 0
 
     for district in District.objects.all():
@@ -81,7 +80,8 @@ def populate_district_forecasts():
             pm25_by_date = _get_hourly_pm25_by_date(
                 float(district.latitude),
                 float(district.longitude),
-                forecast_days,
+                start_date,
+                end_date,
             )
 
             available_dates = sorted(

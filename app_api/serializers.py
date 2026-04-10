@@ -64,8 +64,9 @@ class TravelSerializer(serializers.Serializer):
         today = date.today()
         if value < today:
             raise serializers.ValidationError("Travel date cannot be in the past.")
-        if value > today + timedelta(days=6):
+        # Air Quality API gives None value after 5 days, so we should not allow Travel Date after 5 days
+        if value > today + timedelta(days=4):
             raise serializers.ValidationError(
-                "Travel date must be within the next 6 days."
+                "Travel date must be within the next 4 days."
             )
         return value

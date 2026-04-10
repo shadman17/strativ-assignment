@@ -160,10 +160,10 @@ CACHES = {
 CELERY_BEAT_SCHEDULE = {
     "populate-district-scores-daily": {
         "task": "app_core.tasks.populate_district_scores",
-        "schedule": crontab(hour=15, minute=32),
+        "schedule": crontab(hour=16, minute=7),
     },
     "populate-district-forecasts-daily": {
         "task": "app_core.tasks.populate_district_forecasts",
-        "schedule": crontab(hour=15, minute=32),
+        "schedule": crontab(hour=16, minute=7),
     },
 }

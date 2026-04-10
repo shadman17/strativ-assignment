@@ -28,9 +28,11 @@ def district_view(request):
 @api_view(["GET"])
 def top_10_districts_view(request):
     """Return top 10 Districts"""
-    top_districts = DistrictScore.objects.select_related("district").order_by(
-        "avg_temp_2pm_7d", "avg_pm25_7d", "district__source_id"
-    )[:10]
+    top_districts = (
+        DistrictScore.objects.select_related("district")
+        .filter(avg_temp_2pm_7d__isnull=False, avg_pm25_7d__isnull=False)
+        .order_by("avg_temp_2pm_7d", "avg_pm25_7d", "district__source_id")[:10]
+    )
     print("top districts")
     print(top_districts)
     serializer = DistrictScoreSerializer(top_districts, many=True)

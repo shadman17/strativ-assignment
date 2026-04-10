@@ -13,6 +13,13 @@ def _next_7_day_dates():
     return today.isoformat(), end_date.isoformat()
 
 
+def _next_5_day_dates():
+    utc_plus_6 = timezone(timedelta(hours=6))
+    today = datetime.now(utc_plus_6).date()
+    end_date = today + timedelta(days=4)
+    return today.isoformat(), end_date.isoformat()
+
+
 def _average_for_hour(times, values, hour):
     selected_values = []
 
@@ -47,7 +54,7 @@ def _get_avg_temp_2pm_7d(latitude, longitude, start_date, end_date):
     )
 
 
-def _get_avg_pm25_7d(latitude, longitude):
+def _get_avg_pm25_7d(latitude, longitude, start_date, end_date):
     response = requests.get(
         AIR_QUALITY_API_URL,
         params={
@@ -55,7 +62,8 @@ def _get_avg_pm25_7d(latitude, longitude):
             "longitude": longitude,
             "hourly": "pm2_5",
             "timezone": "Asia/Dhaka",
-            "forecast_days": 7,
+            "start_date": start_date,
+            "end_date": end_date,
         },
         timeout=REQUEST_TIMEOUT_SECONDS,
     )
@@ -98,7 +106,7 @@ def _get_hourly_temperature_by_date(latitude, longitude, start_date, end_date):
     return date_to_temp
 
 
-def _get_hourly_pm25_by_date(latitude, longitude, forecast_days):
+def _get_hourly_pm25_by_date(latitude, longitude, start_date, end_date):
     response = requests.get(
         AIR_QUALITY_API_URL,
         params={
@@ -106,7 +114,8 @@ def _get_hourly_pm25_by_date(latitude, longitude, forecast_days):
             "longitude": longitude,
             "hourly": "pm2_5",
             "timezone": "Asia/Dhaka",
-            "forecast_days": forecast_days,
+            "start_date": start_date,
+            "end_date": end_date,
         },
         timeout=REQUEST_TIMEOUT_SECONDS,
     )
